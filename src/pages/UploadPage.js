@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Button, Typography, Box, CircularProgress, Alert } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 function UploadPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); // Используйте useNavigate вместо useHistory
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -27,7 +29,11 @@ function UploadPage() {
       });
 
       if (response.ok) {
+        const data = await response.json(); // Предполагаем, что сервер возвращает JSON
         setMessage('Файл успешно загружен!');
+        localStorage.setItem('sessionId', data.session_id);
+        localStorage.setItem('chunks', data.chunks);
+        navigate('/processing');
       } else {
         setMessage('Ошибка при загрузке файла.');
       }
