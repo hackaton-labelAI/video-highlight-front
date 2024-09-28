@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function ProcessingPage() {
   const [processingPercentage, setProcessingPercentage] = useState(0);
   const sessionId = localStorage.getItem('sessionId');
   const chunks = localStorage.getItem('chunks');
-
+  const navigate = useNavigate(); // Используйте useNavigate вместо useHistory
+  const [vv, setVV]= useState(false)
   useEffect(() => {
     if (!sessionId || !chunks) {
       console.error('Session ID or chunks not found in localStorage');
       return;
     }
 
-    const websocketUrl = `ws://localhost:8000/ws/video-processing/${sessionId}`;
+    const websocketUrl = `${process.env.REACT_APP_BACKEND_URL_WS}ws/video-processing/${sessionId}`;
     const ws = new WebSocket(websocketUrl);
 
     ws.onopen = () => {
@@ -23,6 +25,12 @@ function ProcessingPage() {
       console.log(data);
       if (data === "1") {
         setProcessingPercentage((prev) => Math.min(prev + (100 / chunks), 100));
+      }else if (data === "2") {
+        setVV(true)
+        // Redirect to session ID page after 2 seconds
+        setTimeout(() => {
+          navigate(`/session_id/${sessionId}`);
+        }, 2000);
       }
     };
 
@@ -40,6 +48,8 @@ function ProcessingPage() {
       <h1 style={styles.title}>Обработка видео</h1>
       <progress style={styles.progress} value={processingPercentage} max="100"></progress>
       <p style={styles.percentage}>{processingPercentage}% обработано</p>
+      <p style={styles.percentage}>клипы созданы: {vv?  "ДА": "НЕТ"}</p>
+      
     </div>
   );
 }

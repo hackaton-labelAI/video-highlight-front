@@ -23,7 +23,7 @@ function UploadPage() {
     formData.append('file', selectedFile);
 
     try {
-      const response = await fetch('http://localhost:8000/upload', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL_HTTP}upload`, {
         method: 'POST',
         body: formData,
       });
