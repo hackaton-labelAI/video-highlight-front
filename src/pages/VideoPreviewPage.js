@@ -39,7 +39,7 @@ function VideoPreviewPage({ setVideoInfo }) {
   return (
     <div style={styles.pageContainer}>
       <div style={styles.contentContainer}>
-        <h2 style={styles.header}>Найденные момент</h2>
+        <h2 style={styles.header}>Найденные моменты</h2>
         <div style={styles.gridContainer}>
           {videos.map((video, index) => (
             <div
