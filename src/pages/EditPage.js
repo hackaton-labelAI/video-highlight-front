@@ -4,6 +4,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Player, ControlBar } from 'video-react';
 import 'video-react/dist/video-react.css'; // import css
 import './EditPage.css'; // Custom styles for further enhancement
+import SRTStringEditor from './SRTStringEditor';
+
+
 
 function EditPage({ videoInfo }) {
     const { chunk_id } = useParams();
@@ -21,6 +24,7 @@ function EditPage({ videoInfo }) {
         subtitles_stroke: '',
         subtitles_background: '',
     });
+    const [subtitles, setSubtitles] = useState("");
 
     useEffect(() => {
         const fetchVideo = async () => {
@@ -32,6 +36,22 @@ function EditPage({ videoInfo }) {
                 console.error('Error fetching video');
             }
         };
+        
+        const fetchSubtitles = async () => {
+            try {
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL_HTTP}project/${session_id}/subtitles/${chunk_id}`);
+                if (response.ok) {
+                    const text = await response.text();  // Ожидаем завершения промиса
+                    setSubtitles(text);  // Передаем результат как строку
+                } else {
+                    console.error('Error fetching video');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+        
+        fetchSubtitles();
 
         fetchVideo();
     }, [session_id, chunk_id]);
@@ -134,7 +154,7 @@ function EditPage({ videoInfo }) {
                             </select>
                         </div>
                         <div className="form-group mb-3">
-                            <label htmlFor="music_volume_delta" className="form-label">Громкость музыки:</label>
+                            <label htmlFor="music_volume_delta" className="form-label">Громкость музыки (можно отрицательную, чтобы было тише):</label>
                             <input type="number" id="music_volume_delta" name="music_volume_delta" className="form-control" value={formData.music_volume_delta} onChange={handleChange} />
                         </div>
                         <div className="form-group mb-3">
@@ -224,9 +244,14 @@ function EditPage({ videoInfo }) {
                 {/* Video Player */}
                 <div className="col d-flex justify-content-center" style={{ flex: 2, marginRight: '10px' }}>
                     <div className="border rounded overflow-hidden" style={{ width: '300px', height: '700px' }}>
+                        {videoSrc 
+                        ? 
                         <Player fluid={true} src={videoSrc} className="w-100 h-100">
                             <ControlBar autoHide={true} />
                         </Player>
+                        :
+                        <div>Ожидайте загрзки видео</div>
+                        }
                     </div>
                 </div>
 
@@ -249,6 +274,12 @@ function EditPage({ videoInfo }) {
                         <label className="form-label">Почему имеет приоритет {chunk_id}:</label>
                         <div>{videoInfo.json_data.description}</div>
                     </div>
+                </div>
+            </div>
+            <div className="mt-4">
+                <h4 className="mb-3">Субтитры</h4>
+                <div>
+                    <SRTStringEditor initialSRT={subtitles} session_id={session_id} video_id={chunk_id}/>
                 </div>
             </div>
         </div>
